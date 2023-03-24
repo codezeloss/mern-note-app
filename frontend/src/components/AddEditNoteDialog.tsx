@@ -4,25 +4,37 @@ import { NoteInput } from "../network/notes_api";
 import * as NotesApi from "../network/notes_api";
 
 interface AddNoteDialogProps {
+  noteToEdit?: Note;
   onDismiss: () => void;
   onNoteSaved: (note: Note) => void;
 }
 
-const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<NoteInput>();
+const AddEditNoteDialog = ({ noteToEdit, onDismiss, onNoteSaved }: AddNoteDialogProps) => {
+  // React Hook Form
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<NoteInput>({
+    defaultValues: {
+      title: noteToEdit?.title || "",
+      text: noteToEdit?.text || "",
+    },
+  });
 
-  const onSubmit = async (input: NoteInput) => {
+  // Submit
+  async function onSubmit(input: NoteInput) {
     try {
-      const noteResponse = await NotesApi.createNote(input);
+      let noteResponse: Note;
+
+      if (noteToEdit) {
+        noteResponse = await NotesApi.updateNote(noteToEdit._id, input);
+      } else {
+        noteResponse = await NotesApi.createNote(input);
+      }
+      
+      // !!
       onNoteSaved(noteResponse);
     } catch (error) {
       console.log(error);
     }
-  };
+  }
 
   const inputStyles = `px-4 py-2 w-full border-[1px] rounded-md outline-none`;
 
@@ -30,7 +42,9 @@ const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
     <div className="absolute z-20 top-0 w-full h-full bg-slate-700/40 p-10">
       <div className=" bg-white rounded-md shadow-md w-[500px] mx-auto p-6">
         <div className="flex justify-between items-center mb-8 pb-2 border-b-[1px]">
-          <h1 className="text-lg font-bold">Add Note</h1>
+          <h1 className="text-lg font-bold">
+            {noteToEdit ? "Edit" : "Add"} Note
+          </h1>
 
           <button type="button" onClick={onDismiss}>
             X
@@ -39,7 +53,7 @@ const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
 
         <form
           className="flex flex-col gap-4"
-          id="addNoteForm"
+          id="addEditNoteForm"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div>
@@ -68,21 +82,22 @@ const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
               <p className="text-sm text-red-600">{errors.text?.message}</p>
             )}
           </div>
-        </form>
 
-        <div className="flex items-center justify-between">
-          <div />
-          <button
-            form="addNoteForm"
-            className="bg-amber-700 text-white px-6 py-2 rounded-md text-sm mt-2"
-            type="submit"
-          >
-            Save
-          </button>
-        </div>
+          <div className="flex items-center justify-between">
+            <div />
+            <button
+              form="addEditNoteForm"
+              className="bg-amber-700 text-white px-6 py-2 rounded-md text-sm mt-2"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              Save
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default AddNoteDialog;
+export default AddEditNoteDialog;

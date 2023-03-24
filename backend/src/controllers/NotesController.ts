@@ -9,12 +9,7 @@ export const getAllNotes: RequestHandler = async (req, res, next) => {
   try {
     const notes = await NoteModel.find().exec();
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        notes,
-      },
-    });
+    res.status(200).json(notes);
   } catch (error) {
     next(error);
   }
@@ -24,6 +19,7 @@ export const getAllNotes: RequestHandler = async (req, res, next) => {
 // GET a single Note
 export const getNote: RequestHandler = async (req, res, next) => {
   const { noteId } = req.params;
+  
   try {
     if (!mongoose.isValidObjectId(noteId)) {
       throw createHttpError(400, "Invalid Note ID");

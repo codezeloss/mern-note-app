@@ -1,24 +1,15 @@
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
-import cors from "cors";
+// import cors from "cors";
 import notesRoutes from "./routes/notesRoutes";
 import morgan from "morgan";
 import createHttpError, { isHttpError } from "http-errors";
-import bodyParser from "body-parser";
+// import bodyParser from "body-parser";
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173"];
-const options: cors.CorsOptions = {
-  origin: allowedOrigins,
-};
-
 app.use(express.json());
-app.use(cors(options));
 app.use(morgan("dev"));
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 
 // Routes
 app.use("/api/notes", notesRoutes);

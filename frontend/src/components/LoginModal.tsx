@@ -3,6 +3,8 @@ import { User } from "../models/user";
 import { LoginCredentials } from "../network/notes_api";
 import * as NotesApi from "../network/notes_api";
 import TextInput from "./form/TextInput";
+import { useState } from "react";
+import { UnauthorizedError } from "../errors/http_errors";
 
 interface LoginModalProps {
   onDismiss: () => void;
@@ -10,6 +12,8 @@ interface LoginModalProps {
 }
 
 const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
+  const [errorText, setErrorText] = useState<string | null>();
+
   // ** react-hook-form
   const {
     register,
@@ -23,6 +27,11 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
       const user = await NotesApi.login(credentials);
       onLoginSuccessful(user);
     } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        setErrorText(error.message);
+      } else {
+        alert(error);
+      }
       console.log(error);
     }
   }
@@ -38,6 +47,9 @@ const LoginModal = ({ onDismiss, onLoginSuccessful }: LoginModalProps) => {
           </button>
         </div>
 
+        {errorText && (
+          <h1 className="text-lg text-red-600 bg-red-300 p-5">{errorText}</h1>
+        )}
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
           <TextInput
             name="username"

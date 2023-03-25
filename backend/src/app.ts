@@ -8,6 +8,7 @@ import cors from "cors";
 import session from "express-session";
 import env from "./utils/validateEnv";
 import MongoStore from "connect-mongo";
+import { requiresAuth } from "./middlewares/auth";
 // import bodyParser from "body-parser";
 
 const app = express();
@@ -25,14 +26,14 @@ app.use(
     },
     rolling: true,
     store: MongoStore.create({
-      mongoUrl: env.MONGO_CONNECTION_STRING
-    })
+      mongoUrl: env.MONGO_CONNECTION_STRING,
+    }),
   })
 );
 
 // Routes
-app.use("/api/notes", notesRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/notes", requiresAuth, notesRoutes);
 
 // Middleware for errors
 app.use((req, res, next) => {

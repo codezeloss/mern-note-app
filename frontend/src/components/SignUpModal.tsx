@@ -3,6 +3,8 @@ import { User } from "../models/user";
 import { SignUpCredentials } from "../network/notes_api";
 import * as NotesApi from "../network/notes_api";
 import TextInput from "./form/TextInput";
+import { useState } from "react";
+import { ConflictError } from "../errors/http_errors";
 
 interface SignUpModalProps {
   onDismiss: () => void;
@@ -10,6 +12,8 @@ interface SignUpModalProps {
 }
 
 const SignUpModal = ({ onDismiss, onSignUpSuccessful }: SignUpModalProps) => {
+  const [errorText, setErrorText] = useState<string | null>();
+
   // ** react-hook-form
   const {
     register,
@@ -23,6 +27,11 @@ const SignUpModal = ({ onDismiss, onSignUpSuccessful }: SignUpModalProps) => {
       const newUser = await NotesApi.signUp(credentials);
       onSignUpSuccessful(newUser);
     } catch (error) {
+      if (error instanceof ConflictError) {
+        setErrorText(error.message);
+      } else {
+        alert(error);
+      }
       console.log(error);
     }
   }
@@ -38,6 +47,9 @@ const SignUpModal = ({ onDismiss, onSignUpSuccessful }: SignUpModalProps) => {
           </button>
         </div>
 
+        {errorText && (
+          <h1 className="text-lg text-red-600 bg-red-300 p-5">{errorText}</h1>
+        )}
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
           <TextInput
             name="username"

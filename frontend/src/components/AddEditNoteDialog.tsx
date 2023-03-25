@@ -10,7 +10,7 @@ interface AddNoteDialogProps {
 }
 
 const AddEditNoteDialog = ({ noteToEdit, onDismiss, onNoteSaved }: AddNoteDialogProps) => {
-  // React Hook Form
+  // ** React Hook Form
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<NoteInput>({
     defaultValues: {
       title: noteToEdit?.title || "",
@@ -18,7 +18,7 @@ const AddEditNoteDialog = ({ noteToEdit, onDismiss, onNoteSaved }: AddNoteDialog
     },
   });
 
-  // Submit
+  // ** SUBMIT form
   async function onSubmit(input: NoteInput) {
     try {
       let noteResponse: Note;
